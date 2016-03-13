@@ -1,0 +1,48 @@
+# AlpineLinux with a glibc-2.2x and Oracle Java 8
+# tag: oracle-jdk8-stripped
+
+FROM dockreg.owlab.com:5000/alpine-aarch64
+MAINTAINER Nemo
+
+# Install cURL & glibc
+#RUN apk --update add curl ca-certificates tar && \
+#    curl -Ls https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/aarch64/glibc-2.21-r2.apk > /tmp/glibc-2.21-r2.apk && \
+#    apk add --allow-untrusted /tmp/glibc-2.21-r2.apk \
+#    && rm /tmp/glibc-2.21-r2.apk
+RUN apk --update add curl ca-certificates
+
+#Java Version
+ENV JAVA_VERSION_MAJOR 8
+ENV JAVA_VERSION_MINOR 73
+ENV JAVA_VERSION_BUILD 02
+
+# Download and unpack Java
+RUN mkdir /opt && \
+    curl -jksSLH "Cookie:oraclelicense=accept-securebackup-cookie" \
+                 http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-arm64-vfp-hflt.tar.gz \
+    | tar -zxvf - -C /opt && \
+    ln -s /opt/jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR} /opt/java && \
+    rm -rf /opt/java/*src.zip \
+           /opt/java/lib/missioncontrol \
+           /opt/java/lib/visualvm \
+           /opt/java/lib/*javafx* \
+           /opt/java/jre/lib/plugin.jar \
+           /opt/java/jre/lib/ext/jfxrt.jar \
+           /opt/java/jre/bin/javaws \
+           /opt/java/jre/lib/javaws.jar \
+           /opt/java/jre/lib/desktop \
+           /opt/java/jre/plugin \
+           /opt/java/jre/lib/deploy* \
+           /opt/java/jre/lib/*javafx* \
+           /opt/java/jre/lib/*jfx* \
+           /opt/java/jre/lib/aarch64/libdecora_sse.so \
+           /opt/java/jre/lib/aarch64/libprism_*.so \
+           /opt/java/jre/lib/aarch64/libfxplugins.so \
+           /opt/java/jre/lib/aarch64/libglass.so \
+           /opt/java/jre/lib/aarch64/libgstreamer-lite.so \
+           /opt/java/jre/lib/aarch64/libjavafx*.so \
+           /opt/java/jre/lib/aarch64/libjfx*.so
+
+#Set environment
+ENV JAVA_HOME /opt/java
+ENV PATH ${JAVA_HOME}/bin:${PATH}
